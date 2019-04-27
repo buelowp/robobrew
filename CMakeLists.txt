@@ -17,6 +17,7 @@ set(robobrew_SRC
   src/main.cpp
   src/robobrew.cpp
   src/relaymanager.cpp
+  src/brewprocess.cpp
 )
 
 # Tell CMake to create the helloworld executable
