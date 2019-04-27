@@ -5,8 +5,6 @@
  * 
  * MIT License
  *
- * Copyright (c) 2019 Peter Buelow
- *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -84,6 +82,7 @@ RoboBrew::RoboBrew(QWidget *parent) : QWidget(parent)
     m_starter->setPalette(pal);
 
     m_relays = new RelayManager();
+    m_process = new BrewProcess();
 
     connect(m_innerCoil, SIGNAL(released()), this, SLOT(toggleInnerCoil()));
     connect(m_outerCoil, SIGNAL(released()), this, SLOT(toggleOuterCoil()));
@@ -92,6 +91,7 @@ RoboBrew::RoboBrew(QWidget *parent) : QWidget(parent)
     connect(m_timerElapsedTime, SIGNAL(timeout()), this, SLOT(elapsedTimeout()));
     connect(m_timerElapsedSegmentTime, SIGNAL(timeout()), this, SLOT(elapsedSegmentTimeout()));
     connect(m_relays, SIGNAL(relayStateChanged(int, int)), this, SLOT(relayStateChanged(int, int)));
+    connect(m_process, SIGNAL(newSegment(struct BrewStep)), this, SLOT(newSegment(struct BrewStep()));
 }
 
 RoboBrew::~RoboBrew() = default;
@@ -118,6 +118,11 @@ void RoboBrew::togglePump()
 
 void RoboBrew::elapsedSegmentTimeout()
 {
+    m_timeElapsedSegment++;
+    int hour = m_timeElapsedSegment / 60;
+    int minute = m_timeElapsedSegment % 60;
+    QString displayValue = QString("%1:%2").arg(hour).arg(minute, 1, 10, QChar('0'));
+    m_timeElapsedSegmentLabel->display(displayValue);
 }
 
 void RoboBrew::elapsedTimeout()
@@ -200,5 +205,12 @@ void RoboBrew::updateFloatTemp(double t)
 {
     QString temp = QString("%1").arg(t, 0, 'f', 1);
     m_temp2->display(temp);
+}
+
+void RoboBrew::newSegment(struct BrewStep bs)
+{
+    m_timerElapsedSegmentTime->stop();
+    m_timerElapsedSegmentTime->setInterval(RB_ONE_MINUTE);
+    m_timerElapsedSegmentTime->start();
 }
 

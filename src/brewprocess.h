@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2019 <copyright holder> <email>
+ * RoboBrew
+ * robobrew.h
+ * Copyright Peter Buelow (goballstate@gmail.com)
  * 
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -28,6 +30,15 @@
 
 #include <QtCore/QtCore>
 
+#define BP_FARENHEIT    0
+#define BP_CELSIUS      1
+
+struct BrewStep {
+    int time;
+    int temp;
+    QString name;
+};
+
 class BrewProcess : public QObject
 {
     Q_OBJECT
@@ -37,13 +48,22 @@ public:
     ~BrewProcess() override;
     
     void execute();
+    bool isMetric() { return m_metric; }
 
+protected slots:
+    void timeout();
+    
+signals:
+    void newSegment(struct BrewStep);
+    
 private:
     void parseRulesFile(QString);
+    void parseSegment(QString, QJsonObject);
     
     QJsonDocument m_rules;
     QTimer *m_segmentTimer;
-    QVector<int> m_segments;
+    QQueue<struct BrewStep> m_segments;
+    bool m_metric;
 };
 
 #endif // BREWPROCESS_H

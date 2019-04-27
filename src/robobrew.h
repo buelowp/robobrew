@@ -5,8 +5,6 @@
  * 
  * MIT License
  *
- * Copyright (c) 2019 Peter Buelow
- *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -31,6 +29,7 @@
 #include <QtWidgets/QtWidgets>
 
 #include "relaymanager.h"
+#include "brewprocess.h"
 
 #define RB_ONE_MINUTE       (1000 * 60)
 
@@ -52,6 +51,7 @@ public slots:
     void startBrewing();
     void updateBaseTemp(double);
     void updateFloatTemp(double);
+    void newSegment(struct BrewStep);
     
 protected:
     void showEvent(QShowEvent*) override;
@@ -72,9 +72,10 @@ private:
     QPushButton *m_outerCoil;
     QPushButton *m_pump;
     QPushButton *m_starter;
-    RelayManager *m_relays;
     QTimer *m_timerElapsedTime;
     QTimer *m_timerElapsedSegmentTime;
+    RelayManager *m_relays;
+    BrewProcess *m_process;
     
     int m_timeElapsed;
     int m_timeElapsedSegment;
