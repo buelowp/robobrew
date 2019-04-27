@@ -27,31 +27,23 @@
 
 RelayManager::RelayManager(QObject *parent) : QObject(parent)
 {
-#if 0
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "RoboBrew", "RoboBrew");
-    m_pins[RM_INNER_COIL] = settings.value("InnerCoil").toByteArray();
-    m_pins[RM_OUTER_COIL] = settings.value("OuterCoil").toByteArray();
-    m_pins[RM_PUMP] = settings.value("Pump").toByteArray();
+    m_relays[RM_INNER_COIL] = settings.value("InnerCoil").toInt();
+    m_relays[RM_OUTER_COIL] = settings.value("OuterCoil").toInt();
+    m_relays[RM_PUMP] = settings.value("Pump").toInt();
     
+    wiringPiSetupGpio();
+
     for (int i = 0; i < 3; i++) {
-        QString value = QString("/sys/class/gpio%1/value").arg(m_pins[i].toInt());
-        QFile gpio("/sys/class/gpio/export");
-        QFile gpiodir(QString("/sys/class/gpio%1/direction").arg(m_pins[i].toInt()));
-        
-        if (gpio.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            gpio.write(m_pins[i]);
-            if (gpiodir.open(QIODevice::WriteOnly | QIODevice::Text)) {
-                gpiodir.write(QByteArray("out"));
-                QFile *f = new QFile(value);
-                if (f->open(QIODevice::ReadOnly | QIODevice::Text)) {
-                    m_relays[i] = f;
-                    bool state;
-                    qDebug() << __PRETTY_FUNCTION__ << ": Instantiated GPIO << " << m_pins[i] << "for index" << i;
-                }
-            }
-        }
+        pinMode(m_relays[i], OUTPUT);
+        digitalWrite(m_relays[i], 0);
+        m_state[i] = 0;
     }
-#endif
+
+    m_timer = new QTimer(this);
+    m_timer->setInterval(100);
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(timeout()));
+    m_timer->start();
 }
 
 RelayManager::~RelayManager()
@@ -59,35 +51,23 @@ RelayManager::~RelayManager()
 
 }
 
-void RelayManager::setRelayState(int index, bool value)
+void RelayManager::timeout()
 {
-#if 0
-    QFile *f = m_relays[index];
-    
-    if (f) {
-        f->write(QString("%1").arg(value).toUtf8().data());
-        emit relayStateChanged(index, value);
-    }
-#endif
-}
-
-bool RelayManager::getRelayState(int index, bool *state)
-{
-#if 0
-    QFile *f = m_relays[index];
-    
-    if (f) {
-        if (f->seek(0)) {
-            QByteArray ba = f->readAll();
-            if (ba == "1")
-                *state = true;
-            else
-                *state = false;
-            
-            return true;
+    for (int i = 0; i < 3; i++) {
+        if (m_state[i] == digitalRead(m_relays[i])) {
+            emit relayStateChanged(i, !m_state[i]);
+            m_state[i] = !m_state[i];
         }
     }
-#endif
-    return false;
+}
+
+void RelayManager::setRelayState(int index, int value)
+{
+    digitalWrite(m_relays[index], value);
+}
+
+int RelayManager::getRelayState(int index)
+{
+    return digitalRead(m_relays[index]);
 }
 

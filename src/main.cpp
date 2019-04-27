@@ -32,8 +32,8 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     RoboBrew w;
-    w.setGeometry(0,0, 800, 480);
-    w.show();
+    w.showFullScreen();
+//    w.show();
 
     return app.exec();
 }

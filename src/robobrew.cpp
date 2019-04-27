@@ -91,44 +91,29 @@ RoboBrew::RoboBrew(QWidget *parent) : QWidget(parent)
     connect(m_starter, SIGNAL(released()), this, SLOT(startBrewing()));
     connect(m_timerElapsedTime, SIGNAL(timeout()), this, SLOT(elapsedTimeout()));
     connect(m_timerElapsedSegmentTime, SIGNAL(timeout()), this, SLOT(elapsedSegmentTimeout()));
-    connect(m_relays, SIGNAL(relayStateChanged(int, bool)), this, SLOT(relayStateChanged(int, bool)));
+    connect(m_relays, SIGNAL(relayStateChanged(int, int)), this, SLOT(relayStateChanged(int, int)));
 }
 
 RoboBrew::~RoboBrew() = default;
 
-void RoboBrew::showEvent(QShowEvent*)
+void RoboBrew::showEvent(QShowEvent *e)
 {
-    bool state;
-    for (int i = 0; i < 3; i++) {
-        if (m_relays->getRelayState(i, &state))
-            relayStateChanged(i, state);
-        else
-            relayStateChanged(i, false);
-    }
+    QWidget::showEvent(e);
 }
 
 void RoboBrew::toggleInnerCoil()
 {
-    bool state;
-    
-    if (m_relays->getRelayState(RM_INNER_COIL, &state))
-        m_relays->setRelayState(RM_INNER_COIL, !state);
+    m_relays->setRelayState(RM_INNER_COIL, !m_relays->getRelayState(RM_INNER_COIL));
 }
 
 void RoboBrew::toggleOuterCoil()
 {
-    bool state;
-    
-    if (m_relays->getRelayState(RM_OUTER_COIL, &state))
-        m_relays->setRelayState(RM_OUTER_COIL, !state);
+    m_relays->setRelayState(RM_OUTER_COIL, !m_relays->getRelayState(RM_OUTER_COIL));
 }
 
 void RoboBrew::togglePump()
 {
-    bool state;
-    
-    if (m_relays->getRelayState(RM_PUMP, &state))
-        m_relays->setRelayState(RM_PUMP, !state);
+    m_relays->setRelayState(RM_PUMP, !m_relays->getRelayState(RM_PUMP));
 }
 
 void RoboBrew::elapsedSegmentTimeout()
@@ -144,18 +129,18 @@ void RoboBrew::elapsedTimeout()
     m_timeElapsedLabel->display(displayValue);
 }
 
-void RoboBrew::setInnerCoilButtonBackground(bool state)
+void RoboBrew::setInnerCoilButtonBackground(int state)
 {
     QPalette pal = m_innerCoil->palette();
     if (state)
-         pal.setColor(QPalette::Button, QColor(Qt::green));
-     else
-         pal.setColor(QPalette::Button, QColor(Qt::red));
-     m_innerCoil->setAutoFillBackground(true);
+        pal.setColor(QPalette::Button, QColor(Qt::green));
+    else
+        pal.setColor(QPalette::Button, QColor(Qt::red));
+    m_innerCoil->setAutoFillBackground(true);
     m_innerCoil->setPalette(pal);
 }
 
-void RoboBrew::setOuterCoilButtonBackground(bool state)
+void RoboBrew::setOuterCoilButtonBackground(int state)
 {
     QPalette pal = m_outerCoil->palette();
     if (state)
@@ -166,7 +151,7 @@ void RoboBrew::setOuterCoilButtonBackground(bool state)
     m_outerCoil->setPalette(pal);
 }
 
-void RoboBrew::setPumpButtonBackground(bool state)
+void RoboBrew::setPumpButtonBackground(int state)
 {
     QPalette pal = m_pump->palette();
     if (state)
@@ -177,7 +162,7 @@ void RoboBrew::setPumpButtonBackground(bool state)
     m_pump->setPalette(pal);
 }
 
-void RoboBrew::relayStateChanged(int button, bool state)
+void RoboBrew::relayStateChanged(int button, int state)
 {
     switch (button) {
         case RM_INNER_COIL:

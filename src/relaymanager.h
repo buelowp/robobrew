@@ -27,6 +27,7 @@
 #define RELAYMANAGER_H
 
 #include <QtCore/QtCore>
+#include <wiringPi.h>
 
 /**
  * We cheat, but the SB components relay I use has pins
@@ -58,17 +59,19 @@ public:
     RelayManager(QObject *parent = nullptr);
     ~RelayManager();
 
-    bool getRelayState(int, bool*);
+    int getRelayState(int);
     
 public slots:
-    void setRelayState(int, bool);
+    void setRelayState(int, int);
+    void timeout();
     
 signals:
-    void relayStateChanged(int, bool);
+    void relayStateChanged(int, int);
     
 private:
-    QMap<int, QByteArray> m_pins;
-    QMap<int, QFile*> m_relays;
+    QMap<int, int> m_relays;
+    QMap<int, int> m_state;
+    QTimer  *m_timer;
 };
 
 #endif // RELAYMANAGER_H

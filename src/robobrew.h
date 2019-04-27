@@ -48,7 +48,7 @@ public slots:
     void togglePump();
     void elapsedTimeout();
     void elapsedSegmentTimeout();
-    void relayStateChanged(int, bool);
+    void relayStateChanged(int, int);
     void startBrewing();
     void updateBaseTemp(double);
     void updateFloatTemp(double);
@@ -57,9 +57,9 @@ protected:
     void showEvent(QShowEvent*) override;
     
 private:
-    void setPumpButtonBackground(bool);
-    void setInnerCoilButtonBackground(bool);
-    void setOuterCoilButtonBackground(bool);
+    void setPumpButtonBackground(int);
+    void setInnerCoilButtonBackground(int);
+    void setOuterCoilButtonBackground(int);
     
     QGridLayout *m_layout;
     QLCDNumber *m_temp1;

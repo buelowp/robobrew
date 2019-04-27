@@ -23,7 +23,7 @@ set(robobrew_SRC
 add_executable(${PROJECT_NAME} ${robobrew_SRC})
 
 # Use the Widgets module from Qt 5.
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Core Qt5::Network)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Core Qt5::Network wiringPi)
 
 # Install the executable
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
